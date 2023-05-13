@@ -1,0 +1,117 @@
+#include <iostream>
+#include <string>
+#include <stdexcept>
+class Cell{
+    private:
+    std::string m_value ;
+    public:
+    int toInt(){ return std::stoi( m_value ) ; }
+    double toDouble() { return std::stod( m_value) ; }
+    std::string toString(){ return m_value;}
+    void set_value( int value){ m_value = std::to_string( value ); }
+    void set_value( double value){ m_value = std::to_string( value ); }
+    void set_value( std::string  value){ m_value =  value ; }
+} ;
+
+class Spreadsheet{
+    private:
+    Cell ** m_cell;
+    int m_row ;
+    int m_col ;
+        
+    public:
+    Spreadsheet( int row  , int col ){
+         m_row = row ;
+         m_col = col ;
+         m_cell  = new Cell * [row];
+        for( int i = 0 ; i < row ; i++ )
+            m_cell[i] = new Cell [col] ;
+    }
+    ~Spreadsheet(){
+         for (int i = 0; i < m_row; i++)
+            delete[] m_cell[i];
+        delete[] m_cell;
+    }
+
+    void checkVal( int row , int col ){
+        try{
+            if(row >= m_row || col >= m_col ) {
+            throw std::runtime_error( "Out of bounds!! " ) ; }
+           } catch ( const std::exception& e ) {
+                std::cout << "Exception : " << e.what() << std::endl;
+            }
+       }     
+
+    void setCellAt( int row , int col , std::string value ){ 
+        checkVal( row , col);
+        m_cell[row][col].set_value( value);
+    }
+    void setCellAt( int row , int col , Cell * cell){
+        checkVal( row , col);
+        m_cell[row][col] = * cell;
+    }
+    void setCellAt( int row , int col , int value ) {
+        checkVal( row , col);
+        m_cell[row][col].set_value( value);
+    }
+    void setCellAt( int row , int col , double value ) {
+        checkVal( row , col);
+        m_cell[row][col].set_value( value);
+    }
+
+    Cell getCell( int row , int col ){
+        checkVal( row, col);
+        return m_cell[row][col];
+    }
+    
+    
+    void  addRow( int add_row = 1){ 
+        Cell ** tmp = new Cell* [m_row + add_row ];
+        for( int i = 0 ; i< m_row + add_row ; i++ ) {
+            tmp[i] = new Cell [m_col];
+        }
+        for( int i = 0 ; i < m_row  ; i++ ) {
+            for( int j = 0 ; j < m_col ; j++ ) {
+                tmp[i][j] = m_cell[i][j];
+            }
+        }
+        for( int i = 0 ; i< m_row ; i++ )
+            delete [] m_cell[i];
+        delete [] m_cell;
+        m_cell = tmp;
+        m_row += add_row ;
+    }
+    void addCell( int add_cell = 1 ){
+        Cell ** tmp = new Cell * [m_row];
+        for( int i = 0 ; i < m_row ; i++ ) 
+            tmp[i] = new Cell [ m_col + add_cell];
+        for( int i = 0 ; i < m_row ; i++ ){
+            for(int j = 0 ; j < m_col ; j++ )
+                tmp[i][j] = m_cell[i][j];
+           }
+        for( int k = 0 ; k < m_row ; k++ )
+            delete [] m_cell[k] ;
+        delete [] m_cell ;
+        m_cell = tmp ;
+        m_col += add_cell ;
+    }
+
+} ;
+int main(){
+
+    Spreadsheet sp(3,2);
+    sp.setCellAt( 1,1, "test" ) ;
+    Cell cl = sp.getCell(1,1);
+    std::cout << cl.toString() << std::endl ;
+    
+    sp.addRow(1);
+    sp.setCellAt(3, 1, 21 );
+    cl = sp.getCell( 3, 1 );
+    std::cout << cl.toString() << std::endl;
+
+    sp.addCell();
+    sp.setCellAt( 3, 2, 3.3);
+    cl = sp.getCell( 3, 2);
+    std::cout << cl.toDouble()<< std::endl;
+
+}
